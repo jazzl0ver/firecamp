@@ -171,15 +171,15 @@ BuildCatalogImages() {
   # build cassandra docker image
   echo
   target=$system"-cassandra"
-  image="${org}${target}:4.0"
-  path="${TOPWD}/catalog/cassandra/4.0/dockerfile/"
+  image="${org}${target}:4.1"
+  path="${TOPWD}/catalog/cassandra/4.1/dockerfile/"
   docker build -q -t $image $path
   docker push $image
 
   echo
   target=$system"-cassandra-init"
-  image="${org}${target}:4.0"
-  path="${TOPWD}/catalog/cassandra/4.0/init-task-dockerfile/"
+  image="${org}${target}:4.1"
+  path="${TOPWD}/catalog/cassandra/4.1/init-task-dockerfile/"
   cp ${TOPWD}/catalog/waitdns.sh ${path}
   cd $path
   sed -r "$replaceOrgName" Dockerfile.template > Dockerfile
@@ -202,8 +202,8 @@ BuildCatalogImages() {
   # build kafka docker image
   echo
   target=$system"-kafka"
-  image="${org}${target}:3.3"
-  path="${TOPWD}/catalog/kafka/3.3/dockerfile/"
+  image="${org}${target}:3.4"
+  path="${TOPWD}/catalog/kafka/3.4/dockerfile/"
   docker build -q -t $image $path
   docker push $image
 
@@ -330,10 +330,10 @@ BuildCatalogImages() {
   target=$system"-telegraf"
   image="${org}${target}:1.5"
   path="${TOPWD}/catalog/telegraf/1.5/dockerfile/"
-#  cp ${GOPATH}/bin/firecamp-getserviceconf ${path}
-#  docker build -q -t $image $path
-#  rm -f ${path}/firecamp-getserviceconf
-#  docker push $image
+  cp ${GOPATH}/bin/firecamp-getserviceconf ${path}
+  docker build -q -t $image $path
+  rm -f ${path}/firecamp-getserviceconf
+  docker push $image
 }
 
 if [ "$buildtarget" = "all" ]; then
