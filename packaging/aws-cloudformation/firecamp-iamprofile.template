@@ -101,6 +101,7 @@
             "Effect":"Allow",
             "Action":[
               "ssm:GetDocument",
+              "ssm:GetManifest",
               "ssm:PutInventory",
               "ssm:ListAssociations",
               "ssm:ListInstanceAssociations",
