@@ -98,6 +98,28 @@
         "PolicyName":"firecamp-policy",
         "PolicyDocument":{
           "Statement":[{
+            "Sid": "SSMAgentMinimumS3Permissions",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "s3:ListBucket"
+            ],
+            "Resource": [
+                "arn:aws:s3:::aws-ssm-us-east-1/*",
+                "arn:aws:s3:::aws-windows-downloads-us-east-1/*",
+                "arn:aws:s3:::amazon-ssm-us-east-1/*",
+                "arn:aws:s3:::amazon-ssm-packages-us-east-1/*",
+                "arn:aws:s3:::us-east-1-birdwatcher-prod/*",
+                "arn:aws:s3:::patch-baseline-snapshot-us-east-1/*",
+                "arn:aws:s3:::aws-ssm-us-east-1",
+                "arn:aws:s3:::aws-windows-downloads-us-east-1",
+                "arn:aws:s3:::amazon-ssm-us-east-1",
+                "arn:aws:s3:::amazon-ssm-packages-us-east-1",
+                "arn:aws:s3:::us-east-1-birdwatcher-prod",
+                "arn:aws:s3:::patch-baseline-snapshot-us-east-1"
+            ]
+	  },
+          {
             "Effect":"Allow",
             "Action":[
               "ssm:GetDocument",
