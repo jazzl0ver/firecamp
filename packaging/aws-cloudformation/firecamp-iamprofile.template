@@ -122,6 +122,7 @@
           {
             "Effect":"Allow",
             "Action":[
+              "ssm:DescribeDocument",
               "ssm:GetDocument",
               "ssm:GetManifest",
               "ssm:PutInventory",
@@ -139,6 +140,13 @@
               "ec2messages:GetMessages"
             ],
             "Resource":"*"
+          },
+          {
+            "Effect":"Allow",
+            "Action":[
+              "ssm:DescribeDocument"
+            ],
+            "Resource":"arn:aws:ssm:*:*:document/AmazonInspector2-InspectorSsmPluginLinux"
           },
           {
             "Effect":"Allow",
