@@ -57,14 +57,7 @@
             "KeyType" : "RANGE"
           }
         ],
-        "ProvisionedThroughput" : {
-          "ReadCapacityUnits" : {
-            "Ref": "ReadCapacityUnits"
-          },
-          "WriteCapacityUnits" : {
-            "Ref": "WriteCapacityUnits"
-          }
-        }
+        "BillingMode": "PAY_PER_REQUEST"
       }
     }
   }

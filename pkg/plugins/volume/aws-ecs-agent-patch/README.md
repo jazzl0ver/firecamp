@@ -8,8 +8,11 @@ or manually:
 2. apply docker_task_engine_patch to agent/engine/docker_task_engine.go
 3. apply makefile_patch to Makefile
 4. update VERSION (for example, to v1.79.0-firecamp) and README
+5. authenticate to AWS ECR public repo:
+aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 
-Then simply sudo make to build the ecs-agent container image.
+Then simply sudo make to build the ecs-agent container image and issue:
+docker push jazzl0ver/firecamp-amazon-ecs-agent:latest
 
 To manually run the agent container, please initialize the agent first.
 1. Initialize jazzl0ver/amazon-ecs-agent on EC2 for the first time, run start_ecs_agent.sh.

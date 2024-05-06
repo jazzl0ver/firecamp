@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index f11a642fe..15d129901 100644
+index 289ad36ec..4f37ba86b 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -32,7 +32,8 @@ endif
@@ -27,7 +27,7 @@ index f11a642fe..15d129901 100644
  # 'RELEASE' mode
  # TODO: make this idempotent
 diff --git a/README.md b/README.md
-index bc6645de1..c18400552 100644
+index 6107d9e92..c272c488d 100644
 --- a/README.md
 +++ b/README.md
 @@ -7,6 +7,8 @@ The Amazon ECS Container Agent is a component of Amazon Elastic Container Servic
@@ -40,14 +40,14 @@ index bc6645de1..c18400552 100644
  
  The best source of information on running this software is the
 diff --git a/VERSION b/VERSION
-index 3a76d1e78..f739eb4ec 100644
+index 297ae5744..28ca1ae41 100644
 --- a/VERSION
 +++ b/VERSION
 @@ -1 +1 @@
--1.79.1
-+1.79.1-firecamp
+-1.82.3
++1.82.3-firecamp
 diff --git a/agent/config/config.go b/agent/config/config.go
-index 9350c0490..4dacac752 100644
+index 97737c9ef..0e0e90a76 100644
 --- a/agent/config/config.go
 +++ b/agent/config/config.go
 @@ -133,7 +133,7 @@ const (
@@ -60,7 +60,7 @@ index 9350c0490..4dacac752 100644
  	// DefaultNvidiaRuntime is the name of the runtime to pass Nvidia GPUs to containers
  	DefaultNvidiaRuntime = "nvidia"
 diff --git a/agent/engine/docker_task_engine.go b/agent/engine/docker_task_engine.go
-index 92a7fcd23..accfb44c8 100644
+index c62b2e8d3..b2e325603 100644
 --- a/agent/engine/docker_task_engine.go
 +++ b/agent/engine/docker_task_engine.go
 @@ -56,6 +56,7 @@ import (
@@ -68,10 +68,10 @@ index 92a7fcd23..accfb44c8 100644
  	"github.com/aws/amazon-ecs-agent/ecs-agent/utils/ttime"
  	"github.com/aws/aws-sdk-go/aws"
 +	"github.com/cihub/seelog"
+ 	ep "github.com/aws/aws-sdk-go/aws/endpoints"
  	"github.com/docker/docker/api/types"
  	dockercontainer "github.com/docker/docker/api/types/container"
- 	"github.com/pkg/errors"
-@@ -1723,6 +1724,17 @@ func (engine *DockerTaskEngine) createContainer(task *apitask.Task, container *a
+@@ -1775,6 +1776,17 @@ func (engine *DockerTaskEngine) createContainer(task *apitask.Task, container *a
  
  		dockerContainerName = "ecs-" + task.Family + "-" + task.Version + "-" + name + "-" + utils.RandHex()
  
@@ -81,10 +81,10 @@ index 92a7fcd23..accfb44c8 100644
 +
 +		hostConfig, vderr := AddVolumeDriver(hostConfig, container, engine.cfg.Cluster, task.Arn, task.Family)
 +		if vderr != nil {
-+			return dockerapi.DockerContainerMetadata{Error: apierrors.NamedError(vderr)}
++		    return dockerapi.DockerContainerMetadata{Error: apierrors.NamedError(vderr)}
 +		}
 +
-+		seelog.Infof("firecamp volume updated hostConfig Binds %s, VolumeDriver %s, LogConfig %s, hostConfig %s", hostConfig.Binds, hostConfig.VolumeDriver, hostConfig.LogConfig, hostConfig)
++		seelog.Infof("firecamp volume updated hostConfig Binds %s, VolumeDriver %s, LogConfig %s", hostConfig.Binds, hostConfig.VolumeDriver, hostConfig.LogConfig)
 +
  		// Pre-add the container in case we stop before the next, more useful,
  		// AddContainer call. This ensures we have a way to get the container if
