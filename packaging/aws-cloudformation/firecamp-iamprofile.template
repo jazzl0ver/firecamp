@@ -131,6 +131,7 @@
               "ssm:UpdateInstanceInformation",
               "ssm:UpdateInstanceAssociationStatus",
               "ssm:PutComplianceItems",
+              "ssm:PutConfigurePackageResult",
               "ssmmessages:CreateControlChannel",
               "ssmmessages:CreateDataChannel",
               "ssmmessages:OpenControlChannel",
