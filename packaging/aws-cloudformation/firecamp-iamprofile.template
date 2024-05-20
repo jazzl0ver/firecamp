@@ -145,9 +145,13 @@
           {
             "Effect":"Allow",
             "Action":[
-              "ssm:DescribeDocument"
+              "ssm:DescribeDocument",
+              "ssm:GetParameter"
             ],
-            "Resource":"arn:aws:ssm:*:*:document/AmazonInspector2-InspectorSsmPluginLinux"
+            "Resource":[
+        	"arn:aws:ssm:*:*:document/AmazonInspector2-InspectorSsmPluginLinux",
+        	"arn:aws:ssm:*:*:parameter/inspector-aws/service/inspector-linux-application-paths"
+    	    ]
           },
           {
             "Effect":"Allow",
