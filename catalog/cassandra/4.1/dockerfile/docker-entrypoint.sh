@@ -149,7 +149,8 @@ if [ -f "$servicecfgfile" ]; then
   # to enable access control to limit the scope of what defined users can do via JMX.
   export LOCAL_JMX="no"
   echo "$JMX_REMOTE_USER $JMX_REMOTE_PASSWD" > /etc/cassandra/jmxremote.password
-  chmod 0400 /etc/cassandra/jmxremote.password
+  echo -e "user=$JMX_REMOTE_USER\npassword=$JMX_REMOTE_PASSWD" > /etc/cassandra/jolokia-agent.properties
+  chmod 0400 /etc/cassandra/jmxremote.password /etc/cassandra/jolokia-agent.properties
 
   # set cassandra heap size
   export JVM_OPTS="$JVM_OPTS -Xms${HEAP_SIZE_MB}m -Xmx${HEAP_SIZE_MB}m"
@@ -167,9 +168,9 @@ echo
 # TODO enable the basic auth, https://jolokia.org/reference/html/agents.html
 if [ "$PLATFORM" = "swarm" ]; then
   # docker swarm, does not allow not using host network for service, listen on 0.0.0.0
-  export JVM_OPTS="$JVM_OPTS -javaagent:/opt/jolokia-agent/jolokia-jvm-1.5.0-agent.jar=port=8778,host=0.0.0.0"
+  export JVM_OPTS="$JVM_OPTS -javaagent:/opt/jolokia-agent/jolokia-jvm-1.5.0-agent.jar=port=8778,host=0.0.0.0,config=/etc/cassandra/jolokia-agent.properties"
 else
-  export JVM_OPTS="$JVM_OPTS -javaagent:/opt/jolokia-agent/jolokia-jvm-1.5.0-agent.jar=port=8778,host=$SERVICE_MEMBER"
+  export JVM_OPTS="$JVM_OPTS -javaagent:/opt/jolokia-agent/jolokia-jvm-1.5.0-agent.jar=port=8778,host=$SERVICE_MEMBER,config=/etc/cassandra/jolokia-agent.properties"
 fi
 
 echo "$@"
