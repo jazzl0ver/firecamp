@@ -1,5 +1,5 @@
 diff --git a/Makefile b/Makefile
-index 289ad36ec..4f37ba86b 100644
+index 33b104ace..16d6114ee 100644
 --- a/Makefile
 +++ b/Makefile
 @@ -32,7 +32,8 @@ endif
@@ -27,7 +27,7 @@ index 289ad36ec..4f37ba86b 100644
  # 'RELEASE' mode
  # TODO: make this idempotent
 diff --git a/README.md b/README.md
-index 6107d9e92..c272c488d 100644
+index 6ae3cec30..5f00102c1 100644
 --- a/README.md
 +++ b/README.md
 @@ -7,6 +7,8 @@ The Amazon ECS Container Agent is a component of Amazon Elastic Container Servic
@@ -40,14 +40,14 @@ index 6107d9e92..c272c488d 100644
  
  The best source of information on running this software is the
 diff --git a/VERSION b/VERSION
-index 297ae5744..28ca1ae41 100644
+index f63427167..849ec77a4 100644
 --- a/VERSION
 +++ b/VERSION
 @@ -1 +1 @@
--1.82.3
-+1.82.3-firecamp
+-1.87.0
++1.87.0-firecamp
 diff --git a/agent/config/config.go b/agent/config/config.go
-index 97737c9ef..0e0e90a76 100644
+index ccbafa793..83496304f 100644
 --- a/agent/config/config.go
 +++ b/agent/config/config.go
 @@ -133,7 +133,7 @@ const (
@@ -60,31 +60,29 @@ index 97737c9ef..0e0e90a76 100644
  	// DefaultNvidiaRuntime is the name of the runtime to pass Nvidia GPUs to containers
  	DefaultNvidiaRuntime = "nvidia"
 diff --git a/agent/engine/docker_task_engine.go b/agent/engine/docker_task_engine.go
-index c62b2e8d3..b2e325603 100644
+index 291398c25..20adde966 100644
 --- a/agent/engine/docker_task_engine.go
 +++ b/agent/engine/docker_task_engine.go
-@@ -56,6 +56,7 @@ import (
- 	"github.com/aws/amazon-ecs-agent/ecs-agent/utils/retry"
+@@ -58,6 +58,7 @@ import (
  	"github.com/aws/amazon-ecs-agent/ecs-agent/utils/ttime"
  	"github.com/aws/aws-sdk-go/aws"
-+	"github.com/cihub/seelog"
  	ep "github.com/aws/aws-sdk-go/aws/endpoints"
++	"github.com/cihub/seelog"
  	"github.com/docker/docker/api/types"
  	dockercontainer "github.com/docker/docker/api/types/container"
-@@ -1775,6 +1776,17 @@ func (engine *DockerTaskEngine) createContainer(task *apitask.Task, container *a
+ 	"github.com/pkg/errors"
+@@ -2023,6 +2024,15 @@ func (engine *DockerTaskEngine) createContainer(task *apitask.Task, container *a
  
  		dockerContainerName = "ecs-" + task.Family + "-" + task.Version + "-" + name + "-" + utils.RandHex()
  
 +		seelog.Infof("firecamp volume task.Family %s, task.Version %s, task %s", task.Family, task.Version, task)
 +		seelog.Infof("firecamp volume creating container name %s, DockerConfig %s, VolumesFrom %s, MountPoints %s, Links %s, container %s", dockerContainerName, container.DockerConfig, container.VolumesFrom, container.MountPoints, container.Links, container)
 +		seelog.Infof("firecamp volume hostConfig Binds %s, VolumesFrom %s, VolumeDriver %s, hostConfig %s", hostConfig.Binds, hostConfig.VolumesFrom, hostConfig.VolumeDriver, hostConfig)
-+
 +		hostConfig, vderr := AddVolumeDriver(hostConfig, container, engine.cfg.Cluster, task.Arn, task.Family)
 +		if vderr != nil {
-+		    return dockerapi.DockerContainerMetadata{Error: apierrors.NamedError(vderr)}
++			return dockerapi.DockerContainerMetadata{Error: apierrors.NamedError(vderr)}
 +		}
-+
-+		seelog.Infof("firecamp volume updated hostConfig Binds %s, VolumeDriver %s, LogConfig %s", hostConfig.Binds, hostConfig.VolumeDriver, hostConfig.LogConfig)
++		seelog.Infof("firecamp volume updated hostConfig Binds %s, VolumeDriver %s, LogConfig %s, hostConfig %s", hostConfig.Binds, hostConfig.VolumeDriver, hostConfig.LogConfig, hostConfig)
 +
  		// Pre-add the container in case we stop before the next, more useful,
  		// AddContainer call. This ensures we have a way to get the container if
@@ -212,4 +210,69 @@ index 000000000..921d11653
 +	seelog.Info("HostConfig binds the valid volume", hostConfig.Binds,
 +		"cluster", cluster, "taskArn", taskArn, "taskDef", taskDef)
 +	return true, s[0]
++}
+diff --git a/agent/engine/firecamp_task_engine_test.go b/agent/engine/firecamp_task_engine_test.go
+new file mode 100644
+index 000000000..a6b450ab5
+--- /dev/null
++++ b/agent/engine/firecamp_task_engine_test.go
+@@ -0,0 +1,59 @@
++package engine
++
++import (
++	"testing"
++
++	docker "github.com/docker/docker/api/types/container"
++)
++
++func TestDockerConfig(t *testing.T) {
++	cluster := "cluster1"
++	taskArn := "task1"
++	taskDef := "taskDef1"
++	hostConfig := &docker.HostConfig{}
++
++	binds := make([]string, 2)
++
++	// negative case, no volume
++	set, suuid := setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
++	if set {
++		t.Fatalf("expect not valid volume for HostConfig %+v", hostConfig)
++	}
++
++	// negative case, has VolumesFrom
++	binds[0] = "/test-volume:/usr/test-volume"
++	hostConfig.VolumesFrom = binds
++	set, suuid = setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
++	if set {
++		t.Fatalf("expect not valid volume for HostConfig %+v", hostConfig)
++	}
++
++	// negative case, binds 1 local volume
++	hostConfig.VolumesFrom = nil
++	hostConfig.Binds = binds
++	set, suuid = setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
++	if set {
++		t.Fatalf("expect not valid volume for HostConfig %+v", hostConfig)
++	}
++
++	// negative case, binds 2 volumes
++	binds[1] = "/vol2:/usr/vol2"
++	hostConfig.Binds = binds
++	set, suuid = setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
++	if set {
++		t.Fatalf("expect not valid volume for HostConfig %+v", hostConfig)
++	}
++
++	// binds 1 volume
++	binds = []string{"serviceuuid:/usr/vol"}
++	hostConfig.Binds = binds
++	set, suuid = setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
++	if !set || suuid != "serviceuuid" {
++		t.Fatalf("expect valid volume for HostConfig %+v, expect serviceuuid get %s", hostConfig, suuid)
++	}
++	binds = append(binds, "serviceuuid:/usr/vol1")
++	set, suuid = setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
++	if !set || suuid != "serviceuuid" {
++		t.Fatalf("expect valid volume for HostConfig %+v, expect serviceuuid get %s", hostConfig, suuid)
++	}
 +}

@@ -5,10 +5,9 @@ cp aws-ecs-agent.patch ~/firecamp/amazon-ecs-agent; cd ~/firecamp/amazon-ecs-age
 
 or manually:
 1. copy firecamp_task_engine.go to jazzl0ver/amazon-ecs-agent/agent/engine/
-2. apply docker_task_engine_patch to agent/engine/docker_task_engine.go
-3. apply makefile_patch to Makefile
-4. update VERSION (for example, to v1.79.0-firecamp) and README
-5. authenticate to AWS ECR public repo:
+2. apply patches from the patches/ folder
+3. update VERSION (for example, to v1.79.0-firecamp)
+4. authenticate to AWS ECR public repo:
 aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
 
 Then simply sudo make to build the ecs-agent container image and issue:

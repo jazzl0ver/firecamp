@@ -3,7 +3,7 @@ package engine
 import (
 	"testing"
 
-	docker "github.com/fsouza/go-dockerclient"
+	docker "github.com/docker/docker/api/types/container"
 )
 
 func TestDockerConfig(t *testing.T) {
@@ -17,7 +17,7 @@ func TestDockerConfig(t *testing.T) {
 	// negative case, no volume
 	set, suuid := setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
 	if set {
-		t.Fatalf("expect not valid volume for HostConfig %s", hostConfig)
+		t.Fatalf("expect not valid volume for HostConfig %+v", hostConfig)
 	}
 
 	// negative case, has VolumesFrom
@@ -25,7 +25,7 @@ func TestDockerConfig(t *testing.T) {
 	hostConfig.VolumesFrom = binds
 	set, suuid = setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
 	if set {
-		t.Fatalf("expect not valid volume for HostConfig %s", hostConfig)
+		t.Fatalf("expect not valid volume for HostConfig %+v", hostConfig)
 	}
 
 	// negative case, binds 1 local volume
@@ -33,7 +33,7 @@ func TestDockerConfig(t *testing.T) {
 	hostConfig.Binds = binds
 	set, suuid = setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
 	if set {
-		t.Fatalf("expect not valid volume for HostConfig %s", hostConfig)
+		t.Fatalf("expect not valid volume for HostConfig %+v", hostConfig)
 	}
 
 	// negative case, binds 2 volumes
@@ -41,7 +41,7 @@ func TestDockerConfig(t *testing.T) {
 	hostConfig.Binds = binds
 	set, suuid = setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
 	if set {
-		t.Fatalf("expect not valid volume for HostConfig %s", hostConfig)
+		t.Fatalf("expect not valid volume for HostConfig %+v", hostConfig)
 	}
 
 	// binds 1 volume
@@ -49,11 +49,11 @@ func TestDockerConfig(t *testing.T) {
 	hostConfig.Binds = binds
 	set, suuid = setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
 	if !set || suuid != "serviceuuid" {
-		t.Fatalf("expect valid volume for HostConfig %s, expect serviceuuid get %s", hostConfig, suuid)
+		t.Fatalf("expect valid volume for HostConfig %+v, expect serviceuuid get %s", hostConfig, suuid)
 	}
 	binds = append(binds, "serviceuuid:/usr/vol1")
 	set, suuid = setVolumeDriver(hostConfig, cluster, taskArn, taskDef)
 	if !set || suuid != "serviceuuid" {
-		t.Fatalf("expect valid volume for HostConfig %s, expect serviceuuid get %s", hostConfig, suuid)
+		t.Fatalf("expect valid volume for HostConfig %+v, expect serviceuuid get %s", hostConfig, suuid)
 	}
 }

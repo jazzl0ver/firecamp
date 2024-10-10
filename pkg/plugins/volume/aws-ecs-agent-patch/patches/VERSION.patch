@@ -1,0 +1,7 @@
+diff --git a/VERSION b/VERSION
+index f63427167..849ec77a4 100644
+--- a/VERSION
++++ b/VERSION
+@@ -1 +1 @@
+-1.87.0
++1.87.0-firecamp

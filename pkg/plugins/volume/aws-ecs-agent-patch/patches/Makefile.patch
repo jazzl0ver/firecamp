@@ -1,0 +1,28 @@
+diff --git a/Makefile b/Makefile
+index 33b104ace..16d6114ee 100644
+--- a/Makefile
++++ b/Makefile
+@@ -32,7 +32,8 @@ endif
+ 
+ export GO111MODULE=auto
+ 
+-all: docker
++org="jazzl0ver/"
++all: firecampdocker
+ 
+ # Dynamic go build; useful in that it does not have -a so it won't recompile
+ # everything every time
+@@ -92,6 +93,13 @@ else
+     BUILD=cleanbuild
+ endif
+ 
++# 'firecampdocker' builds the agent dockerfile from the current sourcecode tree, dirty
++# or not
++firecampdocker: certs build-in-docker pause-container-release cni-plugins
++	@cd scripts && ./create-amazon-ecs-scratch
++	@docker build -f scripts/dockerfiles/Dockerfile.release -t "${org}firecamp-amazon-ecs-agent:latest" .
++	@echo "Built Docker image \"${org}firecamp-amazon-ecs-agent:latest\""
++
+ # 'docker-release' builds the agent from a clean snapshot of the git repo in
+ # 'RELEASE' mode
+ # TODO: make this idempotent

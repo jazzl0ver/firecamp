@@ -4,10 +4,10 @@ import (
 	"errors"
 	"strings"
 
-	"github.com/aws/amazon-ecs-agent/agent/api"
+	api "github.com/aws/amazon-ecs-agent/agent/api/container"
 
 	"github.com/cihub/seelog"
-	docker "github.com/fsouza/go-dockerclient"
+	docker "github.com/docker/docker/api/types/container"
 )
 
 type VolumeDriverConfigError struct {
@@ -17,7 +17,7 @@ type VolumeDriverConfigError struct {
 func (err *VolumeDriverConfigError) Error() string     { return err.msg }
 func (err *VolumeDriverConfigError) ErrorName() string { return "VolumeDriverConfigError" }
 
-// Define here again to avoid the dependency on githut.com/jazzl0ver/firecamp
+// Define here again to avoid the dependency on githut.com/cloudstax/firecamp
 const (
 	org                 = "jazzl0ver/"
 	volumeDriver        = org + "firecamp-volume"
