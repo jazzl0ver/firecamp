@@ -121,8 +121,6 @@ if [ "$containerPlatform" = "ecs" ]; then
     res=$?
   done
 
-  dnf upgrade -y --releasever=2023.2.20231113
-
   # follow https://github.com/aws/amazon-ecs-agent#usage to set up ecs agent
   # Set up directories the agent uses
   mkdir -p /var/log/ecs /etc/ecs /var/lib/ecs/data

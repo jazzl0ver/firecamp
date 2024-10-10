@@ -312,8 +312,9 @@
         },
         "Release": {
             "Type": "String",
-            "Default": "2.0",
+            "Default": "3.0",
             "AllowedValues": [
+                "3.0",
                 "2.0",
                 "1.6"
             ],
@@ -321,8 +322,9 @@
         },
         "CatalogRelease": {
             "Type": "String",
-            "Default": "2.0",
+            "Default": "3.0",
             "AllowedValues": [
+                "3.0",
                 "2.0",
                 "1.6"
             ],
@@ -339,7 +341,7 @@
             "AllowedPattern": "^[0-9a-zA-Z-/.]*$",
             "ConstraintDescription": "CloudFormation key prefix can include numbers, lowercase letters, uppercase letters, dot (.), hyphens (-), and forward slash (/).",
             "Description": "S3 key prefix for the CloudFormation assets. CloudFormation key prefix can include numbers, lowercase letters, uppercase letters, dot (.), hyphens (-), and forward slash (/).",
-            "Default": "firecamp/releases/2.0/",
+            "Default": "firecamp/releases/3.0/",
             "Type": "String"
         },
         "NodeInstanceType": {

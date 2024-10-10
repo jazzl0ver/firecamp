@@ -55,7 +55,7 @@
             "Type": "String",
             "Default": "",
             "Description": "ID of the instance IAM Profile"
-        },
+    	},
         "QSS3BucketName": {
             "AllowedPattern": "^[0-9a-zA-Z]+([0-9a-zA-Z-]*[0-9a-zA-Z])*$",
             "ConstraintDescription": "Quick Start bucket name can include numbers, lowercase letters, uppercase letters, and hyphens (-). It cannot start or end with a hyphen (-).",
@@ -382,12 +382,12 @@
                     "KeyPairName": {
                         "Ref": "KeyPairName"
                     },
-					"WazuhManager": {
-						"Ref": "WazuhManager"
-					},
-					"WazuhGroup": {
-						"Ref": "WazuhGroup"
-					},
+		    "WazuhManager": {
+			"Ref": "WazuhManager"
+		    },
+		    "WazuhGroup": {
+			"Ref": "WazuhGroup"
+		    },
                     "Release": {
                         "Ref": "Release"
                     },
