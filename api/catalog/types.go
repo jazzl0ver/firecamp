@@ -440,8 +440,14 @@ type CatalogTelegrafOptions struct {
 	CollectIntervalSecs int
 	MonitorServiceName  string
 	MonitorServiceType  string
+	MonitorServiceJmxUser string
+	MonitorServiceJmxPasswd string
 	// The custom metrics to monitor. Leave it empty to use the default metrics for the service.
 	MonitorMetrics string
+	Output string
+	OutputServers string
+	OutputAuthUser string
+	OutputAuthPass string
 }
 
 // CatalogCreateTelegrafRequest creates a Telegraf service.

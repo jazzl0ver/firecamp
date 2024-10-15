@@ -193,8 +193,8 @@ BuildCatalogImages() {
   # build zookeeper docker image
   echo
   target=$system"-zookeeper"
-  image="${org}${target}:3.8"
-  path="${TOPWD}/catalog/zookeeper/3.8/dockerfile/"
+  image="${org}${target}:3.9"
+  path="${TOPWD}/catalog/zookeeper/3.9/dockerfile/"
   docker build -q -t $image $path
   docker push $image
 
@@ -202,8 +202,8 @@ BuildCatalogImages() {
   # build kafka docker image
   echo
   target=$system"-kafka"
-  image="${org}${target}:3.6"
-  path="${TOPWD}/catalog/kafka/3.6/dockerfile/"
+  image="${org}${target}:3.8"
+  path="${TOPWD}/catalog/kafka/3.8/dockerfile/"
   docker build -q -t $image $path
   docker push $image
 
@@ -328,12 +328,12 @@ BuildCatalogImages() {
   # build telegraf docker image
   echo
   target=$system"-telegraf"
-  image="${org}${target}:1.5"
-  path="${TOPWD}/catalog/telegraf/1.5/dockerfile/"
-#  cp ${GOPATH}/bin/firecamp-getserviceconf ${path}
-#  docker build -q -t $image $path
-#  rm -f ${path}/firecamp-getserviceconf
-#  docker push $image
+  image="${org}${target}:1.32"
+  path="${TOPWD}/catalog/telegraf/1.32/dockerfile/"
+  cp ${GOPATH}/bin/firecamp-getserviceconf ${path}
+  docker build -q -t $image $path
+  rm -f ${path}/firecamp-getserviceconf
+  docker push $image
 }
 
 if [ "$buildtarget" = "all" ]; then

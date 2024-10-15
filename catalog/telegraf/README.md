@@ -5,7 +5,11 @@
 
 The FireCamp Telegraf container is based on the [official Telegraf image](https://hub.docker.com/_/telegraf/).
 
-One Telegraf service will monitor one stateful service and send the metrics to AWS CloudWatch. For example, you create a Redis service named "myredis" and want to see the Redis metrics. You could create a Telegraf service for the redis service, view the redis metrics and create the dashboard on AWS CloudWatch. By default, FireCamp Telegraf collects the metrics every 60 seconds. If you want to change the collection interval, you could specify "-tel-collect-interval" when creating the service.
+One Telegraf service will monitor one stateful service and send the metrics to one of the supported destinaitons:
+AWS CloudWatch
+Opensearch
+
+For example, you create a Redis service named "myredis" and want to see the Redis metrics. You could create a Telegraf service for the redis service, view the redis metrics and create the dashboard on AWS CloudWatch. By default, FireCamp Telegraf collects the metrics every 60 seconds. If you want to change the collection interval, you could specify "-tel-collect-interval" when creating the service.
 
 You could limit the Telegraf service memory usage by setting the "max-memory" option when creates the service.
 
@@ -13,12 +17,15 @@ You could limit the Telegraf service memory usage by setting the "max-memory" op
 
 You will pay for CloudWatch usage. If the service generates lots of metrics, the cost may not be low. Please refer to [CloudWatch Pricing](https://aws.amazon.com/cloudwatch/pricing/) for the details. If you want to reduce the cost, you could customize the metrics to monitor. You could put all the custom metrics in one file, and pass the file "-tel-metrics-file=pathtofile" when creating the service. For example, you could create the file with a few metrics for Cassandra:
 ```
-    "/org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency",
-    "/org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency",
-    "/org.apache.cassandra.metrics:type=Storage,name=Load"
+  [[inputs.jolokia2_agent.metric]]
+     name  = "another_custom_metric"
+     mbean = "org.apache.cassandra.metrics:type=Cache,scope=*,name=*"
+     tag_keys = ["name", "scope"]
+     field_prefix = "$1_"
+
 ```
 
-Customizing the metrics is the advanced configuration. Currently FireCamp does not check the format in the custom file. It is your responsibility to ensure the format and metrics are correct. For example, refer to "metrics" part in [Cassandra configs](https://github.com/jazzl0ver/firecamp/pkg/tree/master/catalog/telegraf/1.5/dockerfile/input_cas.conf) for the detail metrics format. FireCamp will simply replace the "metrics" part with the custom metrics in the file.
+Customizing the metrics is the advanced configuration. Currently FireCamp does not check the format in the custom file. It is your responsibility to ensure the format and metrics are correct. For example, refer to "metrics" part in [Cassandra configs](https://github.com/jazzl0ver/firecamp/pkg/tree/master/catalog/telegraf/1.32/dockerfile/input_cas.conf) for the detail metrics format. FireCamp will simply replace the "metrics" part with the custom metrics in the file.
 
 Currently not every service in Telegraf supports to customize the metrics. For example, Telegraf Redis gathers the results of the [INFO](https://redis.io/commands/info) redis command.
 
@@ -50,7 +57,15 @@ firecamp-service-cli -op=create-service -service-type=redis -region=us-east-1 -c
 
 Create the Telegraf service:
 ```
-firecamp-service-cli -op=create-service -service-type=telegraf -region=us-east-1 -cluster=t1 -service-name=tel-myredis -tel-monitor-service-name=myredis -tel-minotor-service-type=redis
+firecamp-service-cli -op=create-service -service-type=telegraf -region=us-east-1 -cluster=t1 -service-name=tel-myredis -tel-monitor-service-name=myredis -tel-monitor-service-type=redis
+firecamp-service-cli -op=create-service -service-type=telegraf -region=us-east-1 -cluster=t1 -service-name=tel-mycass -tel-monitor-service-name=mycass -tel-monitor-service-type=cassandra -tel-output=opensearch -tel-output-servers=https://server1,https://server2 -tel-monitor-service-jmx-user=jmxuser -tel-monitor-service-jmx-passwd=jmxpass
 ```
 
+`-tel-output` may be one of: cloudwatch (default) or opensearch
+`-tel-output-servers` is a list of the destination servers (for opensearch it might be like: https://server1,https://server2), not used for cloudwatch
+`-tel-output-auth-user` and `-tel-output-auth-pass` are output servers credentials, not used for cloudwatch
+`-tel-monitor-service-jmx-user` and `-tel-monitor-service-jmx-passwd` are the monitoring service JMX credentials (if applicable)
+
 Then you could view the metrics on the [CloudWatch console](https://console.aws.amazon.com/cloudwatch), and create the dashboard.
+
+An Opensearch Cassandra dashboard is created automatically as `/firecamp/firecamp-telegraf-cassandra-dashboard.ndjson` within the telegraf container and is ready to be imported into Opensearch. One may grab it using `docker cp` command issued on one of the Firecamp worker hosts, trasfer and import into `Dashboard Management/Saved Objects`

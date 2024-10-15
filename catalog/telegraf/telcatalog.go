@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	defaultVersion = "1.5"
+	defaultVersion = "1.32"
 	// ContainerImage is the main running container.
 	ContainerImage = common.ContainerNamePrefix + "telegraf:" + defaultVersion
 
@@ -22,12 +22,19 @@ const (
 	ENV_MONITOR_SERVICE_NAME     = "MONITOR_SERVICE_NAME"
 	ENV_MONITOR_SERVICE_TYPE     = "MONITOR_SERVICE_TYPE"
 	ENV_MONITOR_SERVICE_MEMBERS  = "MONITOR_SERVICE_MEMBERS"
+	ENV_MONITOR_SERVICE_JMX_USER    = "MONITOR_SERVICE_JMX_USER"
+	ENV_MONITOR_SERVICE_JMX_PASSWD  = "MONITOR_SERVICE_JMX_PASSWD"
 	ENV_MONITOR_METRICS          = "MONITOR_METRICS"
 
 	// Limits the max custom metrics size to 16KB
 	maxMetricsLength = 16 * 1024
 
 	metricsConfFileName = "metrics.conf"
+
+	ENV_OUTPUT             = "OUTPUT"
+	ENV_OUTPUT_SERVERS     = "OUTPUT_SERVERS"
+	ENV_OUTPUT_AUTH_USER   = "OUTPUT_AUTH_USER"
+	ENV_OUTPUT_AUTH_PASS   = "OUTPUT_AUTH_PASS"
 )
 
 // The InfluxData Telegraf catalog service, https://github.com/influxdata/telegraf
@@ -67,8 +74,14 @@ func GenDefaultCreateServiceRequest(platform string, region string, cluster stri
 		&common.EnvKeyValuePair{Name: ENV_MONITOR_COLLECT_INTERVAL, Value: fmt.Sprintf("%ds", opts.CollectIntervalSecs)},
 		&common.EnvKeyValuePair{Name: ENV_MONITOR_SERVICE_NAME, Value: opts.MonitorServiceName},
 		&common.EnvKeyValuePair{Name: ENV_MONITOR_SERVICE_TYPE, Value: attr.Spec.CatalogServiceType},
+		&common.EnvKeyValuePair{Name: ENV_MONITOR_SERVICE_JMX_USER, Value: opts.MonitorServiceJmxUser},
+		&common.EnvKeyValuePair{Name: ENV_MONITOR_SERVICE_JMX_PASSWD, Value: opts.MonitorServiceJmxPasswd},
 		&common.EnvKeyValuePair{Name: ENV_MONITOR_SERVICE_MEMBERS, Value: members},
 		&common.EnvKeyValuePair{Name: ENV_MONITOR_METRICS, Value: opts.MonitorMetrics},
+		&common.EnvKeyValuePair{Name: ENV_OUTPUT, Value: opts.Output},
+		&common.EnvKeyValuePair{Name: ENV_OUTPUT_SERVERS, Value: opts.OutputServers},
+		&common.EnvKeyValuePair{Name: ENV_OUTPUT_AUTH_USER, Value: opts.OutputAuthUser},
+		&common.EnvKeyValuePair{Name: ENV_OUTPUT_AUTH_PASS, Value: opts.OutputAuthPass},
 	}
 
 	serviceCfgs := genServiceConfigs(opts)
@@ -113,8 +126,20 @@ func GenDefaultCreateServiceRequest(platform string, region string, cluster stri
 }
 
 func genServiceConfigs(opts *catalog.CatalogTelegrafOptions) []*manage.ConfigFileContent {
+	if len(opts.Output) == 0 {
+	    opts.Output = "cloudwatch"
+	}
+	if opts.Output == "cloudwatch" {
+	    opts.OutputServers = ""
+	    opts.OutputAuthUser = ""
+	    opts.OutputAuthPass = ""
+	}
+
 	// create service.conf file
-	content := fmt.Sprintf(servicefileContent, opts.CollectIntervalSecs, opts.MonitorServiceName, opts.MonitorServiceType)
+	content := fmt.Sprintf(servicefileContent, opts.CollectIntervalSecs, opts.MonitorServiceName, opts.MonitorServiceType,
+	    opts.MonitorServiceJmxUser, opts.MonitorServiceJmxPasswd,
+	    opts.Output, opts.OutputServers, opts.OutputAuthUser, opts.OutputAuthPass)
+
 	serviceCfg := &manage.ConfigFileContent{
 		FileName: catalog.SERVICE_FILE_NAME,
 		FileMode: common.DefaultConfigFileMode,
@@ -142,5 +167,11 @@ const (
 CollectIntervalSecs=%d
 MonitorServiceName=%s
 MonitorServiceType=%s
+MonitorServiceJmxUser=%s
+MonitorServiceJmxPasswd=%s
+Output=%s
+OutputServers=%s
+OutputAuthUser=%s
+OutputAuthPass=%s
 `
 )

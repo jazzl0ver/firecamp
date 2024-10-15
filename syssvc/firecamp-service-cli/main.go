@@ -213,8 +213,14 @@ var (
 	// The telegraf service creation specific parameters
 	telCollectIntervalSecs = flag.Int("tel-collect-interval", telcatalog.DefaultCollectIntervalSecs, "The service metrics collect interval, unit: seconds")
 	telMonitorServiceName  = flag.String("tel-monitor-service-name", "", "The stateful service to monitor")
-	telMonitorServiceType  = flag.String("tel-monitor-service-type", "", "The type of stateful service to minotor")
+	telMonitorServiceType  = flag.String("tel-monitor-service-type", "", "The type of stateful service to monitor")
+	telMonitorServiceJmxUser   = flag.String("tel-monitor-service-jmx-user", "", "The Service JMX remote user")
+	telMonitorServiceJmxPasswd = flag.String("tel-monitor-service-jmx-passwd", "", "The Service JMX remote password")
 	telMetricsFile         = flag.String("tel-metrics-file", "", "This is an advanced config if you want to customize the metrics to collect. Please follow Telegraf's usage to specify your custom metrics. It is your responsibility to ensure the format and metrics are correct.")
+	telOutput              = flag.String("tel-output", "cloudwatch", "Where to store the metrics: cloudwatch (default) or opensearch")
+	telOutputServers       = flag.String("tel-output-servers", "", "A comma-separated list of destination servers, not used for cloudwatch")
+	telOutputAuthUser      = flag.String("tel-output-auth-user", "", "Output server user name")
+	telOutputAuthPass      = flag.String("tel-output-auth-pass", "", "Output server password")
 
 	// the parameters for getting the config file
 	memberName  = flag.String("member-name", "", "The service member name for getting the member's config file")
@@ -332,7 +338,13 @@ func usage() {
 				printFlag(flag.Lookup("tel-collect-interval"))
 				printFlag(flag.Lookup("tel-monitor-service-name"))
 				printFlag(flag.Lookup("tel-monitor-service-type"))
+				printFlag(flag.Lookup("tel-monitor-service-jmx-user"))
+				printFlag(flag.Lookup("tel-monitor-service-jmx-passwd"))
 				printFlag(flag.Lookup("tel-metrics-file"))
+				printFlag(flag.Lookup("tel-output"))
+				printFlag(flag.Lookup("tel-output-servers"))
+				printFlag(flag.Lookup("tel-output-auth-user"))
+				printFlag(flag.Lookup("tel-output-auth-pass"))
 				return
 			case common.CatalogService_KafkaSinkES:
 				printFlag(flag.Lookup("kc-heap-size"))
@@ -1852,6 +1864,12 @@ func createTelService(ctx context.Context, cli *catalogclient.CatalogServiceClie
 			CollectIntervalSecs: *telCollectIntervalSecs,
 			MonitorServiceName:  *telMonitorServiceName,
 			MonitorServiceType:  *telMonitorServiceType,
+			MonitorServiceJmxUser:   *telMonitorServiceJmxUser,
+			MonitorServiceJmxPasswd: *telMonitorServiceJmxPasswd,
+			Output:              *telOutput,
+			OutputServers:       *telOutputServers,
+			OutputAuthUser:      *telOutputAuthUser,
+			OutputAuthPass:      *telOutputAuthPass,
 		},
 	}
 
