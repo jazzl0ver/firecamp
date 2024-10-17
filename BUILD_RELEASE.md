@@ -16,7 +16,7 @@ Also change "QSS3BucketName" from "jazzl0ver" to "quickstart-reference".
 
 
 3. Docker Images
-make docker to build the docker images for this release, and upload to docker hub. If Amazon ECS agent git creates a new version, update jazzl0ver/amazon-ecs-agent, build a new container and push to docker hub.
+make docker to build the docker images for this release, and upload to docker hub. If Amazon ECS agent git creates a new version, update jazzl0ver/amazon-ecs-agent (see pkg/plugins/volume/aws-ecs-agent-patch/README.md), build a new container and push to docker hub.
 
 
 4. The plugin log file rotates

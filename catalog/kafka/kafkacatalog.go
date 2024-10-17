@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	defaultVersion = "3.8"
+	defaultVersion = "3.9"
 	// ContainerImage is the main running container.
 	ContainerImage = common.ContainerNamePrefix + "kafka:" + defaultVersion
 

@@ -175,8 +175,10 @@
             "Properties": {
         	"LaunchTemplateName": { "Fn::Sub": "${AWS::StackName}-ContainerInstances" },
         	"LaunchTemplateData": {
-        	    BlockDeviceMappings": [{
+        	    "BlockDeviceMappings": [{
+        		"DeviceName": "/dev/xvda",
         		"Ebs": {
+        		    "DeleteOnTermination": true,
         		    "Encrypted": true
         		}
         	    }],
@@ -322,7 +324,7 @@
 				        "Ref": "WazuhManager"
 				    },
 				    "\"\n",
-				    "[ \"$wazuh_group\" = \"\" -a $res -eq 0 ] || WAZUH_AGENT_GROUP=$wazuh_group WAZUH_MANAGER=$wazuh_manager yum install https://packages.wazuh.com/4.x/yum/wazuh-agent-4.9.0-1.x86_64.rpm -y",
+				    "[ \"$wazuh_group\" = \"\" -a $res -eq 0 ] || WAZUH_AGENT_GROUP=$wazuh_group WAZUH_MANAGER=$wazuh_manager yum install https://packages.wazuh.com/4.x/yum/wazuh-agent-4.9.2-1.x86_64.rpm -y",
 				    "\n",
 				    "[ \"$wazuh_group\" = \"\" -a $res -eq 0  ] || systemctl enable --now wazuh-agent",
 				    "\n",
