@@ -113,7 +113,7 @@
             	    "LaunchTemplateId": {
                 	"Ref": "ContainerInstances"
             	    },
-            	    "Version": "1"
+            	    "Version": { "Fn::GetAtt": [ "ContainerInstances", "LatestVersionNumber" ] }
                 },
                 "MinSize": "1",
                 "MaxSize": {
