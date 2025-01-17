@@ -13,11 +13,20 @@ Only one region is supported currently. The multi-regions Cassandra will be supp
 
 ## Monitor
 
-FireCamp supports to monitor Cassandra service using Telegraf. Please refer to [FireCamp Telegraf Internals](https://github.com/jazzl0ver/firecamp/pkg/tree/master/catalog/telegraf#firecamp-telegraf-internals) for more details. If you customize the metrics you want to monitor, please pay attention to the data format in the metrics file. Each line includes one metric. Every metric should have the quotation marks and end with comma. The last metri should not end with comma. Example:
+FireCamp supports to monitor Cassandra service using Telegraf. Please refer to [FireCamp Telegraf Internals](https://github.com/jazzl0ver/firecamp/pkg/tree/master/catalog/telegraf#firecamp-telegraf-internals) for more details.
+To get the list of available metrics, the following command may be used:
 ```
-    "/org.apache.cassandra.metrics:type=ClientRequest,scope=Read,name=Latency",
-    "/org.apache.cassandra.metrics:type=ClientRequest,scope=Write,name=Latency",
-    "/org.apache.cassandra.metrics:type=Storage,name=Load"
+curl -u jmxuser -X GET "http://mycas-3.t1-firecamp.com:8778/jolokia/list" | jq -r '.' > mbeans.list.json.formatted
+```
+To prepare a list of cassandra-only node-wide metrics:
+```
+cat mbeans.list.json.formatted | jq -r 'del(.value."jdk.management.jfr")|del(.value."org.apache.cassandra.service")|del(.value."java.util.logging")|del(.value."org.apache.cassandra.diag")|del(.value."org.apache.cassandra.db")' > mbeans.metrics.list.json.formatted
+cat mbeans.metrics.list.json.formatted | jq '.value["org.apache.cassandra.metrics"] | with_entries(select(.key | startswith("keyspace=") | not))' > mbeans.metrics.nokeyspaces.list.json.formatted
+```
+To read metrics, the following commands may be used:
+```
+curl -u jmxuser -X POST "http://mycas-3.t1-firecamp.com:8778/jolokia/read" -d '[{"type":"read","mbean":"org.apache.cassandra.metrics:type=Cache,scope=*,name=*"}]' | jq -r '.'
+curl -u jmxuser -X POST "http://mycas-3.t1-firecamp.com:8778/jolokia/read" -d '[{"type":"read","mbean":"java.lang:name=ParNew,type=GarbageCollector"}]' | jq -r '.'
 ```
 
 ## Scale

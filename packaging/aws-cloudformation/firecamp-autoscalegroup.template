@@ -102,6 +102,30 @@
     	    "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2023/recommended/image_id"
         }
     },
+    "Conditions": {
+	"IsUnlimitedSupported": {
+	    "Fn::Or": [
+		{
+		    "Fn::Equals": [
+			{ "Fn::Select" : [ "0", { "Fn::Split" : [ "." , {"Ref": "NodeInstanceType"} ] } ] },
+			"t2"
+		    ]
+		},
+		{
+		    "Fn::Equals": [
+			{ "Fn::Select" : [ "0", { "Fn::Split" : [ "." , {"Ref": "NodeInstanceType"} ] } ] },
+			"t3"
+		    ]
+		},
+		{
+		    "Fn::Equals": [
+			{ "Fn::Select" : [ "0", { "Fn::Split" : [ "." , {"Ref": "NodeInstanceType"} ] } ] },
+			"t3a"
+		    ]
+		}
+	    ]
+	}
+    },
     "Resources": {
         "ServiceAutoScalingGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
@@ -182,8 +206,12 @@
         		    "Encrypted": true
         		}
         	    }],
-        	    "CreditSpecification":{
-                	"CpuCredits": "unlimited"
+        	    "CreditSpecification": {
+        		"Fn::If": [
+        		    "IsUnlimitedSupported",
+        		    { "CpuCredits": "unlimited" },
+        		    { "Ref": "AWS::NoValue" }
+        		]
                     },
             	    "ImageId": {
     			"Ref": "LatestAMIId"
