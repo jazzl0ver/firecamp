@@ -102,30 +102,6 @@
     	    "Default": "/aws/service/ecs/optimized-ami/amazon-linux-2023/recommended/image_id"
         }
     },
-    "Conditions": {
-	"IsUnlimitedSupported": {
-	    "Fn::Or": [
-		{
-		    "Fn::Equals": [
-			{ "Fn::Select" : [ "0", { "Fn::Split" : [ "." , {"Ref": "NodeInstanceType"} ] } ] },
-			"t2"
-		    ]
-		},
-		{
-		    "Fn::Equals": [
-			{ "Fn::Select" : [ "0", { "Fn::Split" : [ "." , {"Ref": "NodeInstanceType"} ] } ] },
-			"t3"
-		    ]
-		},
-		{
-		    "Fn::Equals": [
-			{ "Fn::Select" : [ "0", { "Fn::Split" : [ "." , {"Ref": "NodeInstanceType"} ] } ] },
-			"t3a"
-		    ]
-		}
-	    ]
-	}
-    },
     "Resources": {
         "ServiceAutoScalingGroup": {
             "Type": "AWS::AutoScaling::AutoScalingGroup",
@@ -206,12 +182,8 @@
         		    "Encrypted": true
         		}
         	    }],
-        	    "CreditSpecification": {
-        		"Fn::If": [
-        		    "IsUnlimitedSupported",
-        		    { "CpuCredits": "unlimited" },
-        		    { "Ref": "AWS::NoValue" }
-        		]
+        	    "CreditSpecification":{
+                	"CpuCredits": "unlimited"
                     },
             	    "ImageId": {
     			"Ref": "LatestAMIId"
@@ -352,9 +324,12 @@
 				        "Ref": "WazuhManager"
 				    },
 				    "\"\n",
-				    "[ \"$wazuh_group\" = \"\" -a $res -eq 0 ] || WAZUH_AGENT_GROUP=$wazuh_group WAZUH_MANAGER=$wazuh_manager yum install https://packages.wazuh.com/4.x/yum/wazuh-agent-4.9.2-1.x86_64.rpm -y",
+				    "if [ -n \"$wazuh_manager\" -a $res -eq 0 ]; then\n",
+				    "  WAZUH_AGENT_GROUP=$wazuh_group WAZUH_MANAGER=$wazuh_manager yum install https://packages.wazuh.com/4.x/yum/wazuh-agent-4.10.1-1.x86_64.rpm -y",
 				    "\n",
-				    "[ \"$wazuh_group\" = \"\" -a $res -eq 0  ] || systemctl enable --now wazuh-agent",
+				    "  systemctl enable --now wazuh-agent",
+				    "\n",
+				    "fi\n",
 				    "\n",
 				    "# Signal init result\n",
 				    "/opt/aws/bin/cfn-signal -e $res ",
